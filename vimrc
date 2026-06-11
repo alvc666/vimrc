@@ -122,8 +122,7 @@ Plug 'schickling/vim-bufonly' "Delete all the buffers except the current buffer.
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } "A command-line fuzzy finder
 Plug 'junegunn/fzf.vim' "fzf 4 vim
 " Plug 'tpope/vim-dispatch' "dispatch.vim: Asynchronous build and test dispatcher
-Plug 'xolox/vim-misc' "Miscellaneous auto-load Vim scripts
-Plug 'xolox/vim-session' "Extended session management
+Plug 'mhinz/vim-startify' "The fancy start screen for Vim
 Plug 'drmikehenry/vim-fontsize' "Adjust font size via keypresses
 Plug 'mbbill/undotree' "The undo history visualizer for VIM
 " Plug 'ludovicchabant/vim-gutentags' "A Vim plugin that manages your tag files 
@@ -135,6 +134,7 @@ Plug 'mengelbrecht/lightline-bufferline' "provides bufferline functionality for 
 " Plug 'daylerees/colour-schemes' "Colour schemes for a variety of editors
 " Plug 'colepeters/spacemacs-theme.vim' "Spacemacs-flavoured colorscheme for Vim and iTerm 
 Plug 'flazz/vim-colorschemes' "one colorscheme pack to rule them all! 
+Plug 'xolox/vim-misc' "Required by vim-colorscheme-switcher
 Plug 'xolox/vim-colorscheme-switcher' "Makes it easy to quickly switch between color schemes
 Plug 'sainnhe/everforest' "Comfortable & Pleasant Color Scheme for Vim 
 Plug 'lifepillar/vim-solarized8' "Solarized colorschemes
@@ -364,7 +364,6 @@ command Date :normal a<C-R>=strftime('%F')<CR>
 command PutTodoText :normal Vp$xxx^df:x0dw
 command PutPRComment :normal iFixes comment: p:x<CR>
 command JsExec :w !node
-command EditSessionConfig execute 'edit' xolox#session#name_to_path(xolox#session#find_current_session()."x")
 command! Json2yaml execute 'r ! echo -e | yq -p j -o y '.shellescape(@",1)
 command! FileOpenInNewWindow !gvim % &
 command! GotoFileAtPosition call GotoFileAtPosition() 
@@ -412,7 +411,6 @@ command! CPFileRelPath let @+=expand("%:.") "Copy the relative path of the curre
 command! CPFileFullPath let @+=expand("%:p") "Copy the full path of the current file
 command! CPFileCoordinates let @+=expand("%:.").":".line(".") "Copy the relative path of the current file and the line number
 command! CPFileFullPathCoordinates let @+=expand("%:p").":".line(".")  "Copy the full path of the current file and the line number
-command! CPSessionName let @+=xolox#session#find_current_session()
 command! CPBranchName call CPBranchName()
 command! SetWorkingDirectory :cd %:p:h
 command! LexploreHere :Lexplore %:p:h
@@ -609,7 +607,7 @@ let g:lightline = {
       \ },
       \ 'component_function': {
       \   'gitbranch': 'FugitiveHead',
-      \   'session_name': 'xolox#session#find_current_session'
+      \   'session_name': 'StartifySessionName'
       \ },
       \ 'component_expand': {
       \  'buffers': 'lightline#bufferline#buffers',
@@ -801,13 +799,15 @@ set omnifunc=ale#completion#OmniFunc
 " let g:ctrlp_custom_ignore = 'bower_components\|node_modules\|DS_Store\|build\|dist\|backstop_data\|target'
 " }}}
 
-" vim-session {{{
-let g:session_autosave = 'yes'
-let g:session_command_aliases = 1
-let g:session_default_to_last= 1
-let g:session_autoload = 'no'
-set sessionoptions-=buffers " Don't save hidden and unloaded buffers in sessions.
-
+" vim-startify {{{
+let g:startify_session_persistence = 1
+let g:startify_lists = [
+      \ { 'type': 'sessions',  'header': ['   Sessions']       },
+      \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
+      \ { 'type': 'files',     'header': ['   MRU']            },
+      \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
+      \ { 'type': 'commands',  'header': ['   Commands']       },
+      \ ]
 " }}}
 
 " vim-merginal {{{
@@ -910,6 +910,10 @@ endfunction
 " copy branch name
 function! CPBranchName()
     execute ':let @+="' . FugitiveHead() . '"'
+endfunction
+
+function! StartifySessionName()
+    return exists('v:this_session') && !empty(v:this_session) ? fnamemodify(v:this_session, ':t') : ''
 endfunction
 
 "copy the filename (non the path) and the content of the current buffer
