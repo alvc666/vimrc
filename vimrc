@@ -366,7 +366,6 @@ command PutPRComment :normal iFixes comment: p:x<CR>
 command JsExec :w !node
 command! Json2yaml execute 'r ! echo -e | yq -p j -o y '.shellescape(@",1)
 command! FileOpenInNewWindow !gvim % &
-command! GotoFileAtPosition call GotoFileAtPosition() 
 command! ShowCursor highlight iCursor guifg=red guibg=green
 
 " Grep commands
@@ -923,42 +922,6 @@ function! CPFilenameAndContent()
     let result = "File: " . filename . "\n-------------------------------------------------------\n" . content
     let @+ = result
     echo "Formatted content yanked to clipboard."
-endfunction
-
-" open a file at a specific position, reading the position from the line under
-" the cursor
-function! GotoFileAtPosition()
-  let target = expand('<cWORD>')
-
-  " file:start-end
-  let m = matchlist(target, '\v^(.*):(\d+)-(\d+)$')
-  if !empty(m)
-    let file = m[1]
-    let start = str2nr(m[2])
-    let end = str2nr(m[3])
-    exec 'edit +' . start . ' ' . fnameescape(file)
-    exec 'normal! V' . max([end - start, 0]) . 'j'
-    return
-  endif
-
-  " file:line:column
-  let m = matchlist(target, '\v^(.*):(\d+):(\d+)$')
-  if !empty(m)
-    let file = m[1]
-    let line = str2nr(m[2])
-    let col = str2nr(m[3])
-    exec 'edit +' . line . ' ' . fnameescape(file)
-    exec 'normal! ' . col . '|'
-    return
-  endif
-
-  " file:line
-  let m = matchlist(target, '\v^(.*):(\d+)$')
-  if !empty(m)
-    let file = m[1]
-    let line = str2nr(m[2])
-    exec 'edit +' . line . ' ' . fnameescape(file)
-  endif
 endfunction
 
 " }}}
