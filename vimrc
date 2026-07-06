@@ -352,6 +352,7 @@ else
     command Nautilus silent !nautilus "%:p:h" &
     command Xterm silent !xterm &
     command! Ptyxis silent !ptyxis --new-window --working-directory="%:p:h" &
+    command! PtyxisPwd execute 'silent !ptyxis --new-window --working-directory=' . shellescape(getcwd()) . ' &'
     command Konsole silent !konsole &
     command Yakuake silent !yakuake &
     command Meld silent !meld . &
