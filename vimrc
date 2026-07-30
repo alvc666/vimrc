@@ -414,6 +414,8 @@ command! CPFileFullPathCoordinates let @+=expand("%:p").":".line(".")  "Copy the
 command! CPBranchName call CPBranchName()
 command! SetWorkingDirectory :cd %:p:h
 command! LexploreHere :Lexplore %:p:h
+command! ExploreHere Explore %:p:h
+command! Ex ExploreHere
 
 "Git CMDs
 command! GDiffUpstreamMainThis execute "silent! !git difftool -y upstream/main % &"
